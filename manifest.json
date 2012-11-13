@@ -1,8 +1,8 @@
 {
-    "name": "NicoNico Audio Extractor",
-    "version": "0.3.3",
+    "name": "NicoNico Audio Extractor EX",
+    "version": "0.1.0",
     "manifest_version": 2,
-    "description": "ニコニコ動画から音声を抽出して保存します。",
+    "description": "ニコニコ動画から連続で音声を抽出して保存します。",
     "icons": {
         "48": "img/48.png",
         "128": "img/128.png"

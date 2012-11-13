@@ -63,10 +63,12 @@ function extractAudioFromFlv(buffer, title){
  */
 function downloadFile(data, filename){
 	var obj = {url: webkitURL.createObjectURL(data), filename: filename};
-	chrome.tabs.create({url: "../html/dummy.html", selected: false}, function(tab){
-		chrome.tabs.sendRequest(tab.id, obj, function(response){
-			console.log(response);
-		});
+	chrome.tabs.create({ url: "../html/dummy.html", selected: false }, function (tab) {
+	    setTimeout(function () {
+	        chrome.tabs.sendRequest(tab.id, obj, function (response) {
+	            console.log(response);
+	        });
+	    }, 3 * 1000);
 	});
 }
 
@@ -161,7 +163,7 @@ function _showMenu(tab){
 	chrome.contextMenus.removeAll(function(){
 		if(!rNico.test(tab.url)) return;
 		chrome.contextMenus.create({
-			title: "Extract Audio",
+			title: "Extract Audio EX",
 			contexts: ["all"],
 			onclick: extractAllAudio
 		});
@@ -172,14 +174,21 @@ function extractAllAudio() {
     chrome.tabs.getSelected(null, function (out_tab) {
         $.get(out_tab.url).done(function (out_data) {
             var i = 0;
+            var jqAnchor = $(out_data).find("a.watch");
             (function roop() {
-                var jqAnchor = $(out_data).find("a.watch");
                 var title = jqAnchor.eq(i).attr("title");
-                var url = "http://www.nicovideo.jp/" + jqAnchor.attr("href");
-                extractAudio(title, url);
-                if (++i < jqAnchor.length) {
-                    setTimeout(roop, 1 * 60 * 1000);
-                }
+                var url = "http://www.nicovideo.jp/" + jqAnchor.eq(i).attr("href");
+                chrome.tabs.create({ url: url, selected: false }, function (tab) {
+                    setTimeout(function () {
+                        chrome.tabs.executeScript(tab.id, {code: "window.close()"});
+                    }, 30 * 1000);
+                });
+                setTimeout(function () {
+                    extractAudio(title, url);
+                    if (++i < jqAnchor.length) {
+                        setTimeout(roop, 1 * 60 * 1000);
+                    }
+                }, 10 * 1000);
             }());
         });
     });
