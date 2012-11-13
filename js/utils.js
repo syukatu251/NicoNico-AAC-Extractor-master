@@ -9,22 +9,22 @@ function loadFileBuffer(url, callback){
 	xhr.onreadystatechange = function(){
 		if(xhr.readyState == 4) {
 			if(~~(xhr.status / 100) == 2) {
-				port.postMessage({progress: 1});
+				//port.postMessage({progress: 1});
 				callback.call(xhr, xhr.response);
 			} else {
-				port.postMessage({err: 'Error: ' + xhr.statusText});
+				//port.postMessage({err: 'Error: ' + xhr.statusText});
 				throw 'Error: ' + xhr.statusText;
 			}
 			setTimeout(function(){
 				notification.cancel();
 			}, 1500);
-			port.disconnect();
-			port = null;
+			//port.disconnect();
+			//port = null;
 		}
 	};
 	xhr.onprogress = function(e){
-		port = port || chrome.extension.connect({name: "progress"});
-		port.postMessage({progress: e.loaded / e.total});
+		//port = port || chrome.extension.connect({name: "progress"});
+		//port.postMessage({progress: e.loaded / e.total});
 	};
 	
 	notification.onclose = function(){

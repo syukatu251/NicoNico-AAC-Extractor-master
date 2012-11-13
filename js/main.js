@@ -76,33 +76,31 @@ function downloadFile(data, filename){
  * If a type of movie is mp4, call function extractAAC.
  * Else if a type of movie is swf, call function extractMp3.
  */
-function extractAudio(in_title, in_url){
-	chrome.tabs.getSelected(null, function(tab){
-		try{
-		    loadFileBuffer(getMovieURL(in_url), function (buffer) {
-				try{
-					var bytes = new Uint8Array(buffer), fn;
-					
-					if(bytes[0] === 70 && bytes[1] === 76 && bytes[2] === 86) {//FLV
-						fn = extractAudioFromFlv;
-					} else if(bytes[0] === 67 && bytes[1] === 87 && bytes[2] === 83) {//SWF
-						fn = extractMp3FromSwf;
-					} else if(bytes[4] === 102 && bytes[5] === 116 && bytes[6] === 121 && bytes[7] === 112) {//MP4
-						fn = extractAAC;
-					} else {
-						throw 'unknown file type';
-					}
-				
-					
-					fn(buffer, in_title);
-				} catch (e) {
-					onerror();
-				}
-			});
-		} catch (e) {
-			onerror();
-		}
-	});
+function extractAudio(in_title, in_url) {
+    try {
+        loadFileBuffer(getMovieURL(in_url), function (buffer) {
+            try {
+                var bytes = new Uint8Array(buffer), fn;
+
+                if (bytes[0] === 70 && bytes[1] === 76 && bytes[2] === 86) {//FLV
+                    fn = extractAudioFromFlv;
+                } else if (bytes[0] === 67 && bytes[1] === 87 && bytes[2] === 83) {//SWF
+                    fn = extractMp3FromSwf;
+                } else if (bytes[4] === 102 && bytes[5] === 116 && bytes[6] === 121 && bytes[7] === 112) {//MP4
+                    fn = extractAAC;
+                } else {
+                    throw 'unknown file type';
+                }
+
+
+                fn(buffer, in_title);
+            } catch (e) {
+                onerror();
+            }
+        });
+    } catch (e) {
+        onerror();
+    }
 }
 
 
@@ -171,16 +169,20 @@ function _showMenu(tab){
 }
 
 function extractAllAudio() {
-    var i = 0;
-    (function roop() {
-        var jqAnchor = jQuery("a.watch");
-        var title = jqAnchor.attr("title");
-        var url = jqAnchor.get(i).href;
-        extractAudio(title, url);
-        if (++i < jqAnchor.length) {
-            setTimeout(roop, 60000);
-        }
-    }());
+    chrome.tabs.getSelected(null, function (out_tab) {
+        $.get(out_tab.url).done(function (out_data) {
+            var i = 0;
+            (function roop() {
+                var jqAnchor = $(out_data).find("a.watch");
+                var title = jqAnchor.eq(i).attr("title");
+                var url = "http://www.nicovideo.jp/" + jqAnchor.attr("href");
+                extractAudio(title, url);
+                if (++i < jqAnchor.length) {
+                    setTimeout(roop, 1 * 60 * 1000);
+                }
+            }());
+        });
+    });
 }
 
 chrome.tabs.onCreated.addListener(_showMenu);
